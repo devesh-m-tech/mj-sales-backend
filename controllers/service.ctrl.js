@@ -1,5 +1,4 @@
-import { Service } from "../models/service.model.js";
-
+import Service from "../models/service.model.js";
 /* ===============================
    GET ALL SERVICES
    =============================== */
