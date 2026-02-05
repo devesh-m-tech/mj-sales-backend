@@ -10,8 +10,11 @@ const serviceSchema = new mongoose.Schema(
 );
 
 // 🔥 IMPORTANT: exact collection name
-export const Service = mongoose.model(
+const Service = mongoose.model(
   "Service",
   serviceSchema,
   "add-services"
 );
+
+// ✅ Default export (so `import Service from ...` works)
+export default Service;
