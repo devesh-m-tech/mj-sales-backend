@@ -1,30 +1,30 @@
 import express from "express";
 import {
-  getAllSalesPersons,
-  approveSalesPerson,
-  rejectSalesPerson,
-  requestSalesPerson,   // 🆕 NEW
+  getAllSalesPersons,   // now returns PENDING USERS
+  approveSalesPerson,   // approves USER
+  rejectSalesPerson,    // rejects USER
+  requestSalesPerson,   // not used (kept to avoid crash)
 } from "../controllers/admin.sales.controller.js";
 
 const router = express.Router();
 
 // ===============================
-// GET ALL SALES PERSONS
+// GET ALL PENDING USERS (approved = false)
 // ===============================
-router.get("/all", getAllSalesPersons);
+router.get("/pending", getAllSalesPersons);
 
 // ===============================
-// REQUEST SALES PERSON (FROM SALES APP)
+// (NOT USED) REQUEST - keep for safety
 // ===============================
 router.post("/request", requestSalesPerson);
 
 // ===============================
-// APPROVE SALES PERSON
+// APPROVE USER
 // ===============================
 router.put("/:id/approve", approveSalesPerson);
 
 // ===============================
-// REJECT SALES PERSON
+// REJECT USER
 // ===============================
 router.put("/:id/reject", rejectSalesPerson);
 

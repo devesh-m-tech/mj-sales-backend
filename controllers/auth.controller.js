@@ -18,7 +18,7 @@ export const sendOtp = async (req, res) => {
       });
     }
 
-    // ✅ CHECK: User must already exist (registered)
+    // ✅ User must already exist
     const user = await User.findOne({ phone });
 
     if (!user) {
@@ -36,7 +36,7 @@ export const sendOtp = async (req, res) => {
     await Otp.create({
       phone,
       otp,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
     });
 
     await sendOtpSms(phone, otp);
@@ -57,7 +57,7 @@ export const sendOtp = async (req, res) => {
 };
 
 /* ===============================
-   VERIFY OTP (NO AUTO USER CREATE)
+   VERIFY OTP (CHECK APPROVAL)
    =============================== */
 export const verifyOtp = async (req, res) => {
   try {
@@ -90,7 +90,7 @@ export const verifyOtp = async (req, res) => {
     // OTP valid → delete it
     await Otp.deleteMany({ phone });
 
-    // ✅ CHECK: User MUST exist
+    // ✅ User must exist
     const user = await User.findOne({ phone });
 
     if (!user) {
@@ -100,8 +100,8 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    // 🔥 SALES PERSON NEEDS ADMIN APPROVAL
-    if (user.role === "sales" && user.approved === false) {
+    // 🔒 ADMIN APPROVAL REQUIRED FOR EVERYONE
+    if (user.approved === false) {
       return res.status(403).json({
         success: false,
         message: "Waiting for admin approval",
@@ -112,7 +112,6 @@ export const verifyOtp = async (req, res) => {
       {
         id: user._id,
         phone: user.phone,
-        role: user.role,
       },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
@@ -123,7 +122,6 @@ export const verifyOtp = async (req, res) => {
       message: "OTP verified successfully",
       token,
       user,
-      isRegistered: true,
     });
   } catch (error) {
     console.error("❌ VERIFY OTP ERROR:", error.message);
@@ -148,19 +146,19 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // ✅ Check if user already exists
+    // Check if user already exists
     let user = await User.findOne({ phone });
 
     if (!user) {
-      // Create new user on register
+      // Create new user (approved = false by default)
       user = await User.create({
         phone,
         name,
         email,
-        role: "user",
+        approved: false,
       });
     } else {
-      // Update existing user
+      // Update existing user details
       user.name = name;
       user.email = email;
       await user.save();
@@ -168,7 +166,7 @@ export const registerUser = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Registration completed",
+      message: "Registration completed. Waiting for admin approval.",
       user,
     });
   } catch (error) {

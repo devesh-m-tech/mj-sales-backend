@@ -1,73 +1,41 @@
 import User from "../models/User.js";
 
 // ===============================
-// GET ALL SALES PERSONS
+// GET ALL PENDING USERS (approved = false)
 // ===============================
 export const getAllSalesPersons = async (req, res) => {
   try {
-    // Only users with role = "sales"
-    const salesPersons = await User.find({ role: "sales" }).sort({ createdAt: -1 });
+    // Now: return all users who are NOT approved yet
+    const pendingUsers = await User.find({ approved: false }).sort({
+      createdAt: -1,
+    });
 
     return res.status(200).json({
       success: true,
-      data: salesPersons,
+      data: pendingUsers,
     });
   } catch (error) {
-    console.error("❌ Get sales persons error:", error.message);
+    console.error("❌ Get pending users error:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch sales persons",
+      message: "Failed to fetch pending users",
     });
   }
 };
 
 // ===============================
-// REQUEST SALES PERSON (CREATE / MARK AS PENDING)
+// (NOT USED ANYMORE) REQUEST SALES PERSON
+// Keeping function to avoid route crash, but not used in flow
 // ===============================
 export const requestSalesPerson = async (req, res) => {
-  try {
-    const { phone } = req.body;
-
-    if (!phone) {
-      return res.status(400).json({
-        success: false,
-        message: "Phone number is required",
-      });
-    }
-
-    // Find or create user by phone
-    let user = await User.findOne({ phone });
-
-    if (!user) {
-      // Create new pending sales user
-      user = await User.create({
-        phone,
-        role: "sales",
-        approved: false,
-      });
-    } else {
-      // If already exists, mark as sales + pending
-      user.role = "sales";
-      user.approved = false;
-      await user.save();
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Sales approval request sent",
-      data: user,
-    });
-  } catch (error) {
-    console.error("❌ Request sales person error:", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to send sales approval request",
-    });
-  }
+  return res.status(400).json({
+    success: false,
+    message: "This endpoint is not used. Users are created via Register.",
+  });
 };
 
 // ===============================
-// APPROVE SALES PERSON
+// APPROVE USER (set approved = true)
 // ===============================
 export const approveSalesPerson = async (req, res) => {
   try {
@@ -82,26 +50,26 @@ export const approveSalesPerson = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Sales person not found",
+        message: "User not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Sales person approved successfully",
+      message: "User approved successfully",
       data: user,
     });
   } catch (error) {
-    console.error("❌ Approve sales person error:", error.message);
+    console.error("❌ Approve user error:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Failed to approve sales person",
+      message: "Failed to approve user",
     });
   }
 };
 
 // ===============================
-// REJECT SALES PERSON
+// REJECT USER (keep approved = false)
 // ===============================
 export const rejectSalesPerson = async (req, res) => {
   try {
@@ -116,20 +84,20 @@ export const rejectSalesPerson = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Sales person not found",
+        message: "User not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Sales person rejected successfully",
+      message: "User rejected successfully",
       data: user,
     });
   } catch (error) {
-    console.error("❌ Reject sales person error:", error.message);
+    console.error("❌ Reject user error:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Failed to reject sales person",
+      message: "Failed to reject user",
     });
   }
 };

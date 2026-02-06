@@ -19,7 +19,7 @@ import adminBusinessRoutes from "./routes/admin.business.routes.js";
 import adminServiceRoutes from "./routes/admin.service.routes.js";
 import manageServiceRoutes from "./routes/service.routes.js";
 
-// ADMIN – USERS
+// ADMIN – USERS (OLD ADMIN USERS / SETTINGS)
 import adminUserRoutes from "./routes/admin.user.routes.js";
 
 // NORMAL USERS
@@ -32,7 +32,7 @@ import featuredRoutes from "./routes/featured.routes.js";
 // ALTER BUSINESS
 import alterRoutes from "./routes/alter.routes.js";
 
-// 🆕 ADMIN – SALES PERSONS
+// 🆕 ADMIN – USER APPROVAL (REUSED sales routes)
 import adminSalesRoutes from "./routes/admin.sales.routes.js";
 
 const app = express();
@@ -49,34 +49,25 @@ connectDB();
 // AUTH
 app.use("/api/auth", authRoutes);
 
-// ADMIN – BUSINESS (🔥 IMPORTANT)
+// ADMIN – BUSINESS
 app.use("/api/admin/business", adminBusinessRoutes);
-/*
-  POST    /api/admin/business/add-business
-  GET     /api/admin/business/all
-  PUT     /api/admin/business/:businessId/approve
-  PUT     /api/admin/business/:businessId/reject
-*/
 
 // ADMIN – SERVICES
 app.use("/api/admin/service", adminServiceRoutes);
 app.use("/api/admin/service", manageServiceRoutes);
 
-// FEATURED ADVERTISEMENTS (Approved only)
+// FEATURED ADVERTISEMENTS
 app.use("/api/admin/featured", featuredRoutes);
-/*
-  GET /api/admin/featured/all
-*/
 
-// ADMIN – USERS
-app.use("/api/admin/users", adminUserRoutes);
+// 🔴 OLD ADMIN USERS (settings, block/unblock etc.)
+app.use("/api/admin/admin-users", adminUserRoutes);
 
-// 🆕 ADMIN – SALES PERSONS
-app.use("/api/admin/salespersons", adminSalesRoutes);
+// 🟢 USER APPROVAL FLOW (PENDING / APPROVE / REJECT)
+app.use("/api/admin/users", adminSalesRoutes);
 /*
-  GET /api/admin/salespersons/all
-  PUT /api/admin/salespersons/:id/approve
-  PUT /api/admin/salespersons/:id/reject
+  GET    /api/admin/users/pending
+  PUT    /api/admin/users/:id/approve
+  PUT    /api/admin/users/:id/reject
 */
 
 // NORMAL USERS
