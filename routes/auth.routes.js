@@ -4,34 +4,33 @@ import {
   sendOtp,
   verifyOtp,
   registerUser,
+  checkApproval,   // ✅ MUST BE HERE
 } from "../controllers/auth.controller.js";
 import AdminUser from "../models/AdminUser.js";
 
 const router = express.Router();
 
-/* ================= EXISTING ROUTES (UNCHANGED) ================= */
+/* ================= OTP ROUTES ================= */
 
-// OTP routes
+// Send OTP
 router.post("/send-otp", sendOtp);
+
+// Verify OTP
 router.post("/verify-otp", verifyOtp);
 
-// Register route
+// 🔁 Check approval status (NO OTP) ✅ ADD THIS
+router.post("/check-approval", checkApproval);
+
+/* ================= REGISTER ROUTE ================= */
+
 router.post("/register", registerUser);
 
-/* ================= NEW LOGIN ROUTE (ADDED) ================= */
+/* ================= ADMIN LOGIN ROUTE ================= */
 
-/*
-  🔐 ADMIN LOGIN
-  - Uses existing AdminUsers collection
-  - Checks email + password
-  - Checks approved status
-  - Returns name, email, role
-*/
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Basic validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -39,7 +38,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Find admin by email
     const admin = await AdminUser.findOne({ email });
 
     if (!admin) {
@@ -49,7 +47,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Check approved
     if (!admin.approved) {
       return res.status(403).json({
         success: false,
@@ -57,7 +54,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, admin.password);
 
     if (!isMatch) {
@@ -67,7 +63,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Success response (NO TOKEN now – simple login)
     return res.status(200).json({
       success: true,
       message: "Login successful",
