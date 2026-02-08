@@ -3,8 +3,8 @@ import bcrypt from "bcryptjs";
 import {
   sendOtp,
   verifyOtp,
-  registerUser,
-  checkApproval,   // ✅ MUST BE HERE
+  checkApproval,
+  registerFullUser,   // 🆕 ONLY THIS REGISTER
 } from "../controllers/auth.controller.js";
 import AdminUser from "../models/AdminUser.js";
 
@@ -18,12 +18,13 @@ router.post("/send-otp", sendOtp);
 // Verify OTP
 router.post("/verify-otp", verifyOtp);
 
-// 🔁 Check approval status (NO OTP) ✅ ADD THIS
+// 🔁 Check approval status (NO OTP)
 router.post("/check-approval", checkApproval);
 
 /* ================= REGISTER ROUTE ================= */
 
-router.post("/register", registerUser);
+// 🆕 ONLY FULL REGISTER (Step1 + Step2 form)
+router.post("/register-full", registerFullUser);
 
 /* ================= ADMIN LOGIN ROUTE ================= */
 

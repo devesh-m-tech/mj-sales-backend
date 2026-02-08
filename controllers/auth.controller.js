@@ -57,7 +57,7 @@ export const sendOtp = async (req, res) => {
 };
 
 /* ===============================
-   VERIFY OTP (FIRST TIME ONLY)
+   VERIFY OTP
    =============================== */
 export const verifyOtp = async (req, res) => {
   try {
@@ -87,10 +87,9 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    // OTP valid → delete it (IMPORTANT)
+    // OTP valid → delete it
     await Otp.deleteMany({ phone });
 
-    // ✅ User must exist
     const user = await User.findOne({ phone });
 
     if (!user) {
@@ -100,7 +99,6 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    // 🔒 If not approved → tell frontend to wait
     if (user.approved === false) {
       return res.status(403).json({
         success: false,
@@ -108,12 +106,8 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    // ✅ Approved → issue token
     const token = jwt.sign(
-      {
-        id: user._id,
-        phone: user.phone,
-      },
+      { id: user._id, phone: user.phone },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
@@ -134,7 +128,7 @@ export const verifyOtp = async (req, res) => {
 };
 
 /* ===============================
-   CHECK APPROVAL STATUS (NO OTP)
+   CHECK APPROVAL STATUS
    =============================== */
 export const checkApproval = async (req, res) => {
   try {
@@ -156,7 +150,6 @@ export const checkApproval = async (req, res) => {
       });
     }
 
-    // Still not approved
     if (user.approved === false) {
       return res.status(200).json({
         success: false,
@@ -165,12 +158,8 @@ export const checkApproval = async (req, res) => {
       });
     }
 
-    // ✅ Now approved → issue token
     const token = jwt.sign(
-      {
-        id: user._id,
-        phone: user.phone,
-      },
+      { id: user._id, phone: user.phone },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
@@ -192,16 +181,16 @@ export const checkApproval = async (req, res) => {
 };
 
 /* ===============================
-   REGISTER USER
+   🆕 FULL REGISTER (STEP 1 + STEP 2)
    =============================== */
-export const registerUser = async (req, res) => {
+export const registerFullUser = async (req, res) => {
   try {
-    const { phone, name, email } = req.body;
+    const { phone, name, email, dob, education, experiences } = req.body;
 
-    if (!phone || !name || !email) {
+    if (!phone || !name || !email || !dob) {
       return res.status(400).json({
         success: false,
-        message: "All fields required",
+        message: "Phone, name, email and DOB are required",
       });
     }
 
@@ -209,19 +198,25 @@ export const registerUser = async (req, res) => {
     let user = await User.findOne({ phone });
 
     if (!user) {
-      // Create new user (approved = false by default)
-      user = await User.create({
+      user = new User({
         phone,
         name,
         email,
-        approved: false,
+        dob,
+        education: education || {},
+        experiences: experiences || [],
+        approved: false, // admin approval needed
       });
     } else {
-      // Update existing user details
+      // Update existing user
       user.name = name;
       user.email = email;
-      await user.save();
+      user.dob = dob;
+      user.education = education || {};
+      user.experiences = experiences || [];
     }
+
+    await user.save();
 
     return res.status(200).json({
       success: true,
@@ -229,10 +224,10 @@ export const registerUser = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error("❌ REGISTER ERROR:", error.message);
+    console.error("❌ REGISTER FULL ERROR:", error.message);
     return res.status(500).json({
       success: false,
-      message: "Registration failed",
+      message: "Full registration failed",
     });
   }
 };

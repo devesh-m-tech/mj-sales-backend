@@ -1,5 +1,20 @@
 import mongoose from "mongoose";
 
+const experienceSchema = new mongoose.Schema(
+  {
+    company: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    years: {
+      type: String, // keep string (ex: "2", "3.5", etc)
+      default: "",
+    },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     phone: {
@@ -21,6 +36,26 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    // 🆕 DATE OF BIRTH
+    dob: {
+      type: String, // store as "YYYY-MM-DD"
+      default: "",
+    },
+
+    // 🆕 EDUCATION DOCUMENTS (store file URL / path / base64 later)
+    education: {
+      tenth: { type: String, default: "" },
+      twelfth: { type: String, default: "" },
+      ug: { type: String, default: "" },
+      pg: { type: String, default: "" },
+    },
+
+    // 🆕 EXPERIENCE LIST
+    experiences: {
+      type: [experienceSchema],
+      default: [],
+    },
+
     // 🔹 ROLE: user | admin | sales
     role: {
       type: String,
@@ -37,5 +72,5 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ DEFAULT EXPORT (NO CHANGE)
+// ✅ DEFAULT EXPORT
 export default mongoose.model("User", userSchema);
