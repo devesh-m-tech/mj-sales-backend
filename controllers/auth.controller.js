@@ -181,20 +181,29 @@ export const checkApproval = async (req, res) => {
 };
 
 /* ===============================
-   🆕 FULL REGISTER (STEP 1 + STEP 2)
+   🆕 FULL REGISTER (STEP 1 + STEP 2) WITH SALES PERSON ID (MANUAL)
    =============================== */
 export const registerFullUser = async (req, res) => {
   try {
-    const { phone, name, email, dob, education, experiences } = req.body;
+    const { phone, name, email, dob, salesPersonId, education, experiences } = req.body;
 
-    if (!phone || !name || !email || !dob) {
+    if (!phone || !name || !email || !dob || !salesPersonId) {
       return res.status(400).json({
         success: false,
-        message: "Phone, name, email and DOB are required",
+        message: "Phone, name, email, DOB and Sales Person ID are required",
       });
     }
 
-    // Check if user already exists
+    // Check duplicate Sales Person ID
+    const existingId = await User.findOne({ salesPersonId });
+    if (existingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Sales Person ID already exists. Please use a different ID.",
+      });
+    }
+
+    // Check if user already exists by phone
     let user = await User.findOne({ phone });
 
     if (!user) {
@@ -203,6 +212,7 @@ export const registerFullUser = async (req, res) => {
         name,
         email,
         dob,
+        salesPersonId, // ✅ from frontend
         education: education || {},
         experiences: experiences || [],
         approved: false, // admin approval needed
@@ -212,6 +222,7 @@ export const registerFullUser = async (req, res) => {
       user.name = name;
       user.email = email;
       user.dob = dob;
+      user.salesPersonId = salesPersonId; // ✅ update
       user.education = education || {};
       user.experiences = experiences || [];
     }

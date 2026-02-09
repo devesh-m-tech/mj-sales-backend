@@ -36,6 +36,14 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    // 🆕 SALES PERSON ID (MANUAL INPUT)
+    salesPersonId: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+    },
+
     // 🆕 DATE OF BIRTH
     dob: {
       type: String, // store as "YYYY-MM-DD"
