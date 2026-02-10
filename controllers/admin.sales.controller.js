@@ -55,21 +55,29 @@ export const requestSalesPerson = async (req, res) => {
 };
 
 // ===============================
-// HELPER: GENERATE NEXT SALES ID (SP001, SP002, ...)
+// HELPER: GENERATE NEXT SALES ID (MJ-YYYY-001, MJ-YYYY-002, ...)
 // ===============================
 const generateNextSalesId = async () => {
-  const lastUser = await User.findOne({ salesId: { $exists: true, $ne: null } })
+  const year = new Date().getFullYear(); // e.g., 2026
+  const prefix = `MJ-${year}-`;
+
+  // Find the last user for this year with salesId like MJ-YYYY-XXX
+  const lastUser = await User.findOne({
+    salesId: { $regex: `^${prefix}` },
+  })
     .sort({ createdAt: -1 })
     .select("salesId");
 
   if (!lastUser || !lastUser.salesId) {
-    return "SP001";
+    return `${prefix}001`;
   }
 
-  const lastNumber = parseInt(lastUser.salesId.replace("SP", ""), 10);
+  // Example: MJ-2026-007 -> take 007
+  const parts = lastUser.salesId.split("-");
+  const lastNumber = parseInt(parts[2], 10);
   const nextNumber = lastNumber + 1;
 
-  return "SP" + String(nextNumber).padStart(3, "0");
+  return `${prefix}${String(nextNumber).padStart(3, "0")}`;
 };
 
 // ===============================
@@ -88,7 +96,7 @@ export const approveSalesPerson = async (req, res) => {
       });
     }
 
-    // If already approved, just return
+    // If already approved and has salesId, just return
     if (user.approved === true && user.salesId) {
       return res.status(200).json({
         success: true,
@@ -97,7 +105,7 @@ export const approveSalesPerson = async (req, res) => {
       });
     }
 
-    // Generate new Sales ID
+    // Generate new Sales ID in MJ-YYYY-XXX format
     const newSalesId = await generateNextSalesId();
 
     user.approved = true;
@@ -120,7 +128,7 @@ export const approveSalesPerson = async (req, res) => {
 };
 
 // ===============================
-// REJECT USER (set approved = false, keep salesId untouched or null)
+// REJECT USER (set approved = false, keep salesId untouched)
 // ===============================
 export const rejectSalesPerson = async (req, res) => {
   try {
