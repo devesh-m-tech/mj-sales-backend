@@ -103,7 +103,6 @@ export const approveBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    // ✅ HARD VALIDATION (OLD)
     if (!mongoose.Types.ObjectId.isValid(businessId)) {
       return res.status(400).json({
         success: false,
@@ -111,7 +110,6 @@ export const approveBusiness = async (req, res) => {
       });
     }
 
-    // ✅ OLD: Update AddBusiness
     const updatedBusiness = await AddBusiness.findByIdAndUpdate(
       businessId,
       { status: "approved" },
@@ -125,7 +123,6 @@ export const approveBusiness = async (req, res) => {
       });
     }
 
-    // 🔥 NEW: INSERT INTO Featured-Advertisements (NON-DESTRUCTIVE)
     const alreadyFeatured = await FeaturedAdvertisement.findOne({
       businessId: updatedBusiness._id,
     });
@@ -161,7 +158,6 @@ export const rejectBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    // ✅ SAME VALIDATION (OLD)
     if (!mongoose.Types.ObjectId.isValid(businessId)) {
       return res.status(400).json({
         success: false,
@@ -192,6 +188,91 @@ export const rejectBusiness = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+/**
+ * 🆕 ASSIGN BUSINESS TO SALES PERSON (ADMIN)
+ * Body: { salesPersonId, salesPersonUserId }
+ */
+export const assignBusinessToSalesPerson = async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const { salesPersonId, salesPersonUserId } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(businessId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid business ID",
+      });
+    }
+
+    if (!salesPersonId) {
+      return res.status(400).json({
+        success: false,
+        message: "salesPersonId is required",
+      });
+    }
+
+    const business = await AddBusiness.findById(businessId);
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        message: "Business not found",
+      });
+    }
+
+    business.assignedSalesPersonId = salesPersonId;
+    business.assignedSalesPersonUserId = salesPersonUserId || null;
+
+    await business.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Business assigned to sales person successfully",
+      data: business,
+    });
+  } catch (error) {
+    console.error("❌ Assign business error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to assign business",
+    });
+  }
+};
+
+/**
+ * 🆕 GET BUSINESSES FOR A SALES PERSON (for Mobile App)
+ * Params: :salesPersonId
+ */
+export const getBusinessesForSalesPerson = async (req, res) => {
+  try {
+    const { salesPersonId } = req.params;
+
+    if (!salesPersonId) {
+      return res.status(400).json({
+        success: false,
+        message: "salesPersonId is required",
+      });
+    }
+
+    const businesses = await AddBusiness.find({
+      assignedSalesPersonId: salesPersonId,
+      status: "approved",
+    }).sort({ updatedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: businesses.length,
+      data: businesses,
+    });
+  } catch (error) {
+    console.error("❌ Get businesses for sales person error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch businesses",
     });
   }
 };

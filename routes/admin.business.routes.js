@@ -4,21 +4,45 @@ import {
   addBusiness,
   approveBusiness,
   rejectBusiness,
+  assignBusinessToSalesPerson,
+  getBusinessesForSalesPerson,
 } from "../controllers/admin.business.controller.js";
 
 const router = express.Router();
 
-// ADD BUSINESS
+// ===============================
+// ADD BUSINESS (USER SIDE)
+// ===============================
 router.post("/add-business", addBusiness);
 
-// GET ALL BUSINESSES
+// ===============================
+// GET ALL BUSINESSES (ADMIN)
+// ?status=pending | approved | rejected
+// ===============================
 router.get("/all", getAllBusinesses);
 
-// APPROVE (must match frontend)
+// ===============================
+// APPROVE BUSINESS (ADMIN)
+// ===============================
 router.put("/:businessId/approved", approveBusiness);
 
-// REJECT
+// ===============================
+// REJECT BUSINESS (ADMIN)
+// ===============================
 router.put("/:businessId/rejected", rejectBusiness);
 
-// ✅ THIS LINE IS MANDATORY
+// ===============================
+// 🆕 ASSIGN BUSINESS TO SALES PERSON (ADMIN)
+// Body: { salesPersonId, salesPersonUserId }
+// ===============================
+router.put("/:businessId/assign", assignBusinessToSalesPerson);
+
+// ===============================
+// 🆕 GET BUSINESSES FOR A SALES PERSON (MOBILE APP)
+// ===============================
+router.get("/sales/:salesPersonId/businesses", getBusinessesForSalesPerson);
+
+// ===============================
+// EXPORT
+// ===============================
 export default router;

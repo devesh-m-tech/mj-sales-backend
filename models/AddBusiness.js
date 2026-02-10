@@ -32,6 +32,20 @@ const AddBusinessSchema = new mongoose.Schema(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+
+    // 🆕 ASSIGNED SALES PERSON
+    assignedSalesPersonId: {
+      type: String, // we will store salesPersonId like: MJ2026001
+      default: null,
+      index: true,
+    },
+
+    // 🆕 OPTIONAL: store user _id also (future use)
+    assignedSalesPersonUserId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   {
     timestamps: true,
