@@ -2,26 +2,90 @@ import mongoose from "mongoose";
 
 const AddBusinessSchema = new mongoose.Schema(
   {
-    ownerName: String,
-    businessName: String,
-    address: String,
-    pincode: String,
-    city: String,
-    state: String,
-    whatsapp: String,
+    ownerName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    instagram: String,
-    instagramLink: String,
-    twitter: String,
-    twitterLink: String,
-    facebook: String,
-    facebookLink: String,
-    website: String,
-    websiteLink: String,
+    businessName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    // 🆕 From UI
-    products: String,
-    description: String,
+    address: {
+      type: String,
+      default: "",
+    },
+
+    pincode: {
+      type: String,
+      default: "",
+    },
+
+    city: {
+      type: String,
+      default: "",
+    },
+
+    state: {
+      type: String,
+      default: "",
+    },
+
+    whatsapp: {
+      type: String,
+      default: "",
+    },
+
+    // Social
+    instagram: {
+      type: String,
+      default: "",
+    },
+    instagramLink: {
+      type: String,
+      default: "",
+    },
+
+    twitter: {
+      type: String,
+      default: "",
+    },
+    twitterLink: {
+      type: String,
+      default: "",
+    },
+
+    facebook: {
+      type: String,
+      default: "",
+    },
+    facebookLink: {
+      type: String,
+      default: "",
+    },
+
+    website: {
+      type: String,
+      default: "",
+    },
+    websiteLink: {
+      type: String,
+      default: "",
+    },
+
+    // From UI
+    products: {
+      type: String,
+      default: "",
+    },
+
+    description: {
+      type: String,
+      default: "",
+    },
 
     gstDoc: {
       type: String,
@@ -36,11 +100,11 @@ const AddBusinessSchema = new mongoose.Schema(
     },
 
     media: {
-      banner: Object,
-      logo: Object,
-      images: [Object],
-      gst: Object,
-      document: Object,
+      banner: { type: Object, default: null },
+      logo: { type: Object, default: null },
+      images: { type: [Object], default: [] },
+      gst: { type: Object, default: null },
+      document: { type: Object, default: null },
     },
 
     status: {
@@ -49,14 +113,13 @@ const AddBusinessSchema = new mongoose.Schema(
       default: "pending",
     },
 
-    // 🆕 ASSIGNED SALES PERSON
+    // ASSIGNED SALES PERSON
     assignedSalesPersonId: {
-      type: String, // MJ2026001
+      type: String, // e.g. SP001
       default: null,
       index: true,
     },
 
-    // 🆕 OPTIONAL: store user _id also
     assignedSalesPersonUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
