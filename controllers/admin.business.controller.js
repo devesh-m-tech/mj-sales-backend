@@ -34,11 +34,13 @@ export const getAllBusinesses = async (req, res) => {
 };
 
 /**
- * ADD business (USER SIDE)  ✅ FIXED: GOES TO PENDING
+ * ADD business (USER SIDE)
+ * ✅ FIXED: SAVES IN EXACT OLD STRUCTURE (PENDING)
  */
 export const addBusiness = async (req, res) => {
   try {
-    const { businessName, ownerName, whatsapp } = req.body;
+    const body = req.body;
+    const { businessName, ownerName, whatsapp } = body;
 
     if (!businessName || !ownerName || !whatsapp) {
       return res.status(400).json({
@@ -49,7 +51,7 @@ export const addBusiness = async (req, res) => {
 
     // Check duplicate by whatsapp (inside selectedApprovedBusiness)
     const existing = await AddBusiness.findOne({
-      "selectedApprovedBusiness.whatsapp": String(whatsapp).trim(),
+      "selectedApprovedBusiness.contactNumber": String(whatsapp).trim(),
     });
 
     if (existing) {
@@ -59,49 +61,68 @@ export const addBusiness = async (req, res) => {
       });
     }
 
-    const body = req.body;
+    // 🔥 Generate simple id like old structure (string)
+    const generatedId = Date.now().toString();
 
-    // 🔥 WRAPPER STRUCTURE (NEW BUSINESS MUST BE PENDING)
+    // 🔥 Build EXACT OLD STRUCTURE
     const doc = {
-      fileUrls: body.media?.images?.map((i) => i.uri) || [],
-      status: "pending",        // ✅ TOP-LEVEL = PENDING
+      _id: generatedId, // keep string id like old sample (optional, remove if Mongo ObjectId needed)
+      fileUrls: (body.media?.images || []).map((i) => i.uri),
+      status: "pending", // TOP LEVEL STATUS = pending
       allowPayment: true,
       createdAt: new Date(),
 
       selectedApprovedBusiness: {
-        ownerName: body.ownerName || "",
-        businessName: body.businessName || "",
-        address: body.address || "",
-        pincode: body.pincode || "",
-        city: body.city || "",
-        state: body.state || "",
-        whatsapp: body.whatsapp || "",
-
-        instagram: body.instagram || "NO",
-        instagramLink: body.instagramLink || "",
-        twitter: body.twitter || "NO",
+        // ===== SAME KEYS AS OLD STRUCTURE =====
+        noOfEmployee: body.noOfEmployee || "",
+        businessImages: (body.media?.images || []).map((i) => i.uri),
         twitterLink: body.twitterLink || "",
-        facebook: body.facebook || "NO",
-        facebookLink: body.facebookLink || "",
-        website: body.website || "NO",
-        websiteLink: body.websiteLink || "",
-
-        products: body.products || "",
-        description: body.description || "",
-
-        gstDoc: body.gstDoc || "NO",
-        businessDoc: body.businessDoc || "NO",
-
-        media: {
-          banner: body.media?.banner || null,
-          logo: body.media?.logo || null,
-          images: body.media?.images || [],
-          gst: body.media?.gst || null,
-          document: body.media?.document || null,
+        businessLocation: body.address || "",
+        generatedid: generatedId,
+        businessDocument: body.businessDoc === "YES",
+        businessLogo: body.media?.logo?.uri || "",
+        websiteLink: body.websiteLink ? [body.websiteLink] : [],
+        streetAddresses: body.streetAddresses?.length
+          ? body.streetAddresses
+          : [body.address || ""],
+        businessBanner: body.media?.banner?.uri || "",
+        ownerName: body.ownerName || "",
+        state: body.state || "",
+        businessDescription: body.description || "",
+        city: body.city || "",
+        uid: "", // keep empty if not available
+        pinCode: body.pincode || "",
+        establishedIn: body.establishedIn || "",
+        payment: false,
+        paymentId: "",
+        status: "pending", // INSIDE STATUS = pending
+        productsOffered: body.products || "",
+        amountPaid: 0,
+        twitterAccount: body.twitter === "YES",
+        subscription: [],
+        instagramProfileLink: body.instagramLink || "",
+        startDate: "",
+        selfieImage: body.media?.selfie?.uri || "",
+        instagramLink: body.instagramLink || "",
+        userId: body.whatsapp || "",
+        id: "",
+        timestamp: {
+          _seconds: Math.floor(Date.now() / 1000),
+          _nanoseconds: 0,
         },
-
-        status: "pending",       // ✅ INSIDE ALSO PENDING
-        createdAt: new Date(),
+        contactNumber: body.whatsapp || "",
+        instagramProfile: body.instagram === "YES",
+        location: {
+          latitude: 0,
+          longitude: 0,
+        },
+        facebookProfile: body.facebook === "YES",
+        businessCategory: body.businessCategory || "",
+        website: body.website === "YES",
+        gstCertificate: body.gstDoc === "YES",
+        expiryDate: "",
+        facebookLink: body.facebookLink || "",
+        businessName: body.businessName || "",
       },
     };
 
@@ -129,7 +150,7 @@ export const approveBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(businessId)) {
+    if (!mongoose.Types.ObjectId.isValid(businessId) && !businessId) {
       return res.status(400).json({
         success: false,
         message: "Invalid business ID",
@@ -139,8 +160,8 @@ export const approveBusiness = async (req, res) => {
     const updatedBusiness = await AddBusiness.findByIdAndUpdate(
       businessId,
       {
-        status: "approved", // ✅ top-level
-        "selectedApprovedBusiness.status": "approved", // ✅ inside also
+        status: "approved", // top-level
+        "selectedApprovedBusiness.status": "approved", // inside
       },
       { new: true }
     );
@@ -162,7 +183,7 @@ export const approveBusiness = async (req, res) => {
         businessId: updatedBusiness._id,
         selectedApprovedBusiness: updatedBusiness.toObject(),
         status: "approved",
-        fileUrls: [],
+        fileUrls: updatedBusiness.fileUrls || [],
       });
     }
 
@@ -187,7 +208,7 @@ export const rejectBusiness = async (req, res) => {
   try {
     const { businessId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(businessId)) {
+    if (!mongoose.Types.ObjectId.isValid(businessId) && !businessId) {
       return res.status(400).json({
         success: false,
         message: "Invalid business ID",
@@ -197,8 +218,8 @@ export const rejectBusiness = async (req, res) => {
     const updatedBusiness = await AddBusiness.findByIdAndUpdate(
       businessId,
       {
-        status: "rejected", // ✅ top-level
-        "selectedApprovedBusiness.status": "rejected", // ✅ inside also
+        status: "rejected", // top-level
+        "selectedApprovedBusiness.status": "rejected", // inside
       },
       { new: true }
     );
@@ -232,7 +253,7 @@ export const assignBusinessToSalesPerson = async (req, res) => {
     const { businessId } = req.params;
     const { salesPersonId, salesPersonUserId } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(businessId)) {
+    if (!businessId) {
       return res.status(400).json({
         success: false,
         message: "Invalid business ID",
@@ -255,8 +276,9 @@ export const assignBusinessToSalesPerson = async (req, res) => {
       });
     }
 
-    business.assignedSalesPersonId = salesPersonId;
-    business.assignedSalesPersonUserId = salesPersonUserId;
+    business.selectedApprovedBusiness.assignedSalesPersonId = salesPersonId;
+    business.selectedApprovedBusiness.assignedSalesPersonUserId =
+      salesPersonUserId;
 
     await business.save();
 
@@ -289,7 +311,7 @@ export const getBusinessesForSalesPerson = async (req, res) => {
     }
 
     const businesses = await AddBusiness.find({
-      assignedSalesPersonUserId: salesPersonId,
+      "selectedApprovedBusiness.assignedSalesPersonUserId": salesPersonId,
       status: "approved",
     }).sort({ updatedAt: -1 });
 

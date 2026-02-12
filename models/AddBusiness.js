@@ -10,6 +10,9 @@ const MediaSchema = new mongoose.Schema(
     images: { type: [Object], default: [] },
     gst: { type: Object, default: null },
     document: { type: Object, default: null },
+
+    // 🔥 ADDED (old structure support)
+    selfie: { type: Object, default: null },
   },
   { _id: false }
 );
@@ -37,7 +40,25 @@ const SelectedApprovedBusinessSchema = new mongoose.Schema(
       default: "",
     },
 
+    // 🔥 ADDED (old JSON uses array of addresses)
+    streetAddresses: {
+      type: [String],
+      default: [],
+    },
+
+    // 🔥 ADDED (old JSON uses businessLocation)
+    businessLocation: {
+      type: String,
+      default: "",
+    },
+
     pincode: {
+      type: String,
+      default: "",
+    },
+
+    // 🔥 ADDED (old JSON uses pinCode)
+    pinCode: {
       type: String,
       default: "",
     },
@@ -52,9 +73,37 @@ const SelectedApprovedBusinessSchema = new mongoose.Schema(
       default: "",
     },
 
+    // Old JSON uses contactNumber instead of whatsapp
+    contactNumber: {
+      type: String,
+      default: "",
+    },
+
     whatsapp: {
       type: String,
       default: "",
+    },
+
+    // 🔥 ADDED (old JSON fields)
+    uid: {
+      type: String,
+      default: "",
+    },
+
+    userId: {
+      type: String,
+      default: "",
+    },
+
+    id: {
+      type: String,
+      default: "",
+    },
+
+    generatedid: {
+      type: String,
+      default: "",
+      index: true,
     },
 
     // Social
@@ -63,6 +112,17 @@ const SelectedApprovedBusinessSchema = new mongoose.Schema(
       default: "",
     },
     instagramLink: {
+      type: String,
+      default: "",
+    },
+
+    // 🔥 ADDED (old JSON)
+    instagramProfile: {
+      type: Boolean,
+      default: false,
+    },
+
+    instagramProfileLink: {
       type: String,
       default: "",
     },
@@ -76,6 +136,12 @@ const SelectedApprovedBusinessSchema = new mongoose.Schema(
       default: "",
     },
 
+    // 🔥 ADDED (old JSON)
+    twitterAccount: {
+      type: Boolean,
+      default: false,
+    },
+
     facebook: {
       type: String,
       default: "",
@@ -85,11 +151,25 @@ const SelectedApprovedBusinessSchema = new mongoose.Schema(
       default: "",
     },
 
+    // 🔥 ADDED (old JSON)
+    facebookProfile: {
+      type: Boolean,
+      default: false,
+    },
+
     website: {
       type: String,
       default: "",
     },
+
+    // Old JSON uses array for websiteLink
     websiteLink: {
+      type: [String],
+      default: [],
+    },
+
+    // 🔥 ADDED (old JSON)
+    businessCategory: {
       type: String,
       default: "",
     },
@@ -100,7 +180,19 @@ const SelectedApprovedBusinessSchema = new mongoose.Schema(
       default: "",
     },
 
+    // 🔥 ADDED (old JSON uses productsOffered)
+    productsOffered: {
+      type: String,
+      default: "",
+    },
+
     description: {
+      type: String,
+      default: "",
+    },
+
+    // 🔥 ADDED (old JSON uses businessDescription)
+    businessDescription: {
       type: String,
       default: "",
     },
@@ -111,15 +203,99 @@ const SelectedApprovedBusinessSchema = new mongoose.Schema(
       default: "NO",
     },
 
+    // 🔥 ADDED (old JSON uses gstCertificate boolean)
+    gstCertificate: {
+      type: Boolean,
+      default: false,
+    },
+
     businessDoc: {
       type: String,
       enum: ["YES", "NO"],
       default: "NO",
     },
 
+    // 🔥 ADDED (old JSON uses businessDocument boolean)
+    businessDocument: {
+      type: Boolean,
+      default: false,
+    },
+
     media: {
       type: MediaSchema,
       default: () => ({}),
+    },
+
+    // 🔥 ADDED (old JSON image fields)
+    businessBanner: {
+      type: String,
+      default: "",
+    },
+
+    businessLogo: {
+      type: String,
+      default: "",
+    },
+
+    businessImages: {
+      type: [String],
+      default: [],
+    },
+
+    selfieImage: {
+      type: String,
+      default: "",
+    },
+
+    // 🔥 ADDED (old JSON fields)
+    noOfEmployee: {
+      type: String,
+      default: "",
+    },
+
+    establishedIn: {
+      type: Number,
+      default: null,
+    },
+
+    payment: {
+      type: Boolean,
+      default: false,
+    },
+
+    paymentId: {
+      type: String,
+      default: "",
+    },
+
+    amountPaid: {
+      type: Number,
+      default: 0,
+    },
+
+    subscription: {
+      type: [Object],
+      default: [],
+    },
+
+    startDate: {
+      type: Date,
+      default: null,
+    },
+
+    expiryDate: {
+      type: Date,
+      default: null,
+    },
+
+    location: {
+      latitude: { type: Number, default: null },
+      longitude: { type: Number, default: null },
+    },
+
+    timestamp: {
+      type: Object,
+      default: null,
     },
 
     status: {
