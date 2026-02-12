@@ -34,7 +34,7 @@ export const getAllBusinesses = async (req, res) => {
 };
 
 /**
- * ADD business (USER SIDE)  ✅ UPDATED
+ * ADD business (USER SIDE)  ✅ UPDATED (WRAPPED STRUCTURE)
  */
 export const addBusiness = async (req, res) => {
   try {
@@ -47,9 +47,9 @@ export const addBusiness = async (req, res) => {
       });
     }
 
-    // Check duplicate by whatsapp
+    // Check duplicate by whatsapp (inside selectedApprovedBusiness)
     const existing = await AddBusiness.findOne({
-      whatsapp: String(whatsapp).trim(),
+      "selectedApprovedBusiness.whatsapp": String(whatsapp).trim(),
     });
 
     if (existing) {
@@ -59,12 +59,53 @@ export const addBusiness = async (req, res) => {
       });
     }
 
-    // 🔥 Save FULL payload from frontend (form + links + media + etc)
-    const business = new AddBusiness({
-      ...req.body,
-      status: "pending",
-    });
+    const body = req.body;
 
+    // 🔥 WRAPPER STRUCTURE (LIKE YOUR FIRST JSON)
+    const doc = {
+      fileUrls: body.media?.images?.map((i) => i.uri) || [],
+      status: "Approved", // top-level status
+      allowPayment: true,
+      createdAt: new Date(),
+
+      selectedApprovedBusiness: {
+        ownerName: body.ownerName || "",
+        businessName: body.businessName || "",
+        address: body.address || "",
+        pincode: body.pincode || "",
+        city: body.city || "",
+        state: body.state || "",
+        whatsapp: body.whatsapp || "",
+
+        instagram: body.instagram || "NO",
+        instagramLink: body.instagramLink || "",
+        twitter: body.twitter || "NO",
+        twitterLink: body.twitterLink || "",
+        facebook: body.facebook || "NO",
+        facebookLink: body.facebookLink || "",
+        website: body.website || "NO",
+        websiteLink: body.websiteLink || "",
+
+        products: body.products || "",
+        description: body.description || "",
+
+        gstDoc: body.gstDoc || "NO",
+        businessDoc: body.businessDoc || "NO",
+
+        media: {
+          banner: body.media?.banner || null,
+          logo: body.media?.logo || null,
+          images: body.media?.images || [],
+          gst: body.media?.gst || null,
+          document: body.media?.document || null,
+        },
+
+        status: "pending", // inside business status
+        createdAt: new Date(),
+      },
+    };
+
+    const business = new AddBusiness(doc);
     await business.save();
 
     res.status(201).json({
@@ -243,7 +284,6 @@ export const getBusinessesForSalesPerson = async (req, res) => {
       });
     }
 
-    // 🔥 Use assignedSalesPersonUserId (ObjectId field)
     const businesses = await AddBusiness.find({
       assignedSalesPersonUserId: salesPersonId,
       status: "approved",

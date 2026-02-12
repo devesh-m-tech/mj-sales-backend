@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const FeaturedAdvertisementSchema = new mongoose.Schema(
   {
-    // 🔥 ADD THIS (needed for approve → featured insert)
+    // 🔥 Reference to AddBusiness (same as before)
     businessId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AddBusiness",
@@ -16,16 +16,17 @@ const FeaturedAdvertisementSchema = new mongoose.Schema(
       default: [],
     },
 
-    // 🔧 FIX: lowercase status (backend consistency)
+    // 🔧 Status (backend consistency)
     status: {
       type: String,
       enum: ["approved", "pending", "rejected"],
       default: "approved",
     },
 
-    // ✅ OLD FIELD – UNCHANGED
+    // ✅ This will store the APPROVED BUSINESS SNAPSHOT
+    // Now it can store the FULL WRAPPER or just the inner object (both OK)
     selectedApprovedBusiness: {
-      type: Object,
+      type: Object, // keeping Object so old + new structure both work
       required: true,
     },
   },

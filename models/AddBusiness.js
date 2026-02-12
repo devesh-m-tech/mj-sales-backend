@@ -1,6 +1,24 @@
 import mongoose from "mongoose";
 
-const AddBusinessSchema = new mongoose.Schema(
+// --------------------
+// Media Sub Schema
+// --------------------
+const MediaSchema = new mongoose.Schema(
+  {
+    banner: { type: Object, default: null },
+    logo: { type: Object, default: null },
+    images: { type: [Object], default: [] },
+    gst: { type: Object, default: null },
+    document: { type: Object, default: null },
+  },
+  { _id: false }
+);
+
+// --------------------
+// Selected Approved Business Sub Schema
+// (THIS IS YOUR OLD FLAT STRUCTURE MOVED INSIDE)
+// --------------------
+const SelectedApprovedBusinessSchema = new mongoose.Schema(
   {
     ownerName: {
       type: String,
@@ -100,11 +118,8 @@ const AddBusinessSchema = new mongoose.Schema(
     },
 
     media: {
-      banner: { type: Object, default: null },
-      logo: { type: Object, default: null },
-      images: { type: [Object], default: [] },
-      gst: { type: Object, default: null },
-      document: { type: Object, default: null },
+      type: MediaSchema,
+      default: () => ({}),
     },
 
     status: {
@@ -124,6 +139,41 @@ const AddBusinessSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
+    },
+
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
+
+// --------------------
+// MAIN WRAPPER SCHEMA
+// --------------------
+const AddBusinessSchema = new mongoose.Schema(
+  {
+    // Top-level wrapper fields (LIKE YOUR FIRST JSON)
+    fileUrls: {
+      type: [String],
+      default: [],
+    },
+
+    status: {
+      type: String,
+      default: "Approved", // top-level status
+    },
+
+    allowPayment: {
+      type: Boolean,
+      default: true,
+    },
+
+    // All business details inside this
+    selectedApprovedBusiness: {
+      type: SelectedApprovedBusinessSchema,
+      required: true,
     },
   },
   {
