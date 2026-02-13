@@ -14,6 +14,7 @@ export const getServices = async (req, res) => {
       data,
     });
   } catch (error) {
+    console.error("GET SERVICES ERROR:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -33,16 +34,20 @@ export const getCategories = async (req, res) => {
       data,
     });
   } catch (error) {
+    console.error("GET CATEGORIES ERROR:", error);
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-// 🔹 ADD CATEGORY
+
+/**
+ * ADD CATEGORY (STORE IMAGE AS BASE64 IN DB)
+ */
 export const addCategory = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, image } = req.body; // image = base64 string
 
     if (!name) {
       return res
@@ -57,18 +62,30 @@ export const addCategory = async (req, res) => {
         .json({ success: false, message: "Category already exists" });
     }
 
-    const data = await Category.create({ name });
+    const data = await Category.create({
+      name,
+      image: image || "", // 🆕 store base64 string in DB
+    });
 
-    res.status(201).json({ success: true, data });
+    res.status(201).json({
+      success: true,
+      data,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("ADD CATEGORY ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// 🔹 ADD SERVICE
+/**
+ * ADD SERVICE (STORE IMAGE AS BASE64 IN DB)
+ */
 export const addService = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, image } = req.body; // image = base64 string
 
     if (!name) {
       return res
@@ -83,10 +100,20 @@ export const addService = async (req, res) => {
         .json({ success: false, message: "Service already exists" });
     }
 
-    const data = await Service.create({ name });
+    const data = await Service.create({
+      name,
+      image: image || "", // 🆕 store base64 string in DB
+    });
 
-    res.status(201).json({ success: true, data });
+    res.status(201).json({
+      success: true,
+      data,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("ADD SERVICE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

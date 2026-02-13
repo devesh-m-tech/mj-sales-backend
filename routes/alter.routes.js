@@ -8,11 +8,11 @@ import {
 
 const router = express.Router();
 
-// ================= GET (ALREADY WORKING) =================
+/* ================= GET (ALREADY WORKING) ================= */
 router.get("/services", getServices);
 router.get("/categories", getCategories);
 
-// ================= POST (NEW – SAFE ADD) =================
+/* ================= POST (DB METHOD – BASE64 IMAGE IN BODY) ================= */
 router.post("/services", addService);
 router.post("/categories", addCategory);
 
