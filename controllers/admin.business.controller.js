@@ -35,7 +35,7 @@ export const getAllBusinesses = async (req, res) => {
 
 /**
  * ADD business (USER SIDE)
- * ✅ FIXED: SAVES IN EXACT OLD STRUCTURE (PENDING)
+ * ✅ Allows SAME WhatsApp to add MULTIPLE businesses
  */
 export const addBusiness = async (req, res) => {
   try {
@@ -53,17 +53,8 @@ export const addBusiness = async (req, res) => {
       });
     }
 
-    // Check duplicate by whatsapp
-    const existing = await AddBusiness.findOne({
-      "selectedApprovedBusiness.contactNumber": String(whatsapp).trim(),
-    });
-
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "Business with this WhatsApp already exists",
-      });
-    }
+    // ❌ DUPLICATE CHECK REMOVED ❌
+    // Now same WhatsApp can add multiple businesses
 
     // 🔥 Generate simple id like old structure (string)
     const generatedId = Date.now().toString();
@@ -309,7 +300,7 @@ export const getBusinessesForSalesPerson = async (req, res) => {
 };
 
 /**
- * 🆕 DELETE BUSINESS (ADMIN)  ✅ ADD THIS
+ * 🆕 DELETE BUSINESS (ADMIN)
  */
 export const deleteBusiness = async (req, res) => {
   try {
