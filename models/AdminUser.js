@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const adminUserSchema = new mongoose.Schema(
   {
@@ -22,7 +23,7 @@ const adminUserSchema = new mongoose.Schema(
       default: false,
     },
 
-    // 🔐 ADD THIS (IMPORTANT)
+    // 🔐 PASSWORD (HASHED)
     password: {
       type: String,
       required: true,
@@ -30,6 +31,20 @@ const adminUserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+/* ================= AUTO HASH PASSWORD (SAFE ADD) ================= */
+adminUserSchema.pre("save", async function (next) {
+  // password change இல்லனா re-hash வேண்டாம்
+  if (!this.isModified("password")) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default mongoose.model(
   "AdminUser",
